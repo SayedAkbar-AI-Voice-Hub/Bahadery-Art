@@ -11,7 +11,7 @@ const DiscountPopup: React.FC = () => {
   useEffect(() => {
     const hasSeenPopup = localStorage.getItem('bahadery_discount_seen');
     if (!hasSeenPopup) {
-      const timer = setTimeout(() => setIsVisible(true), 3000);
+      const timer = setTimeout(() => setIsVisible(true), 10000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -26,14 +26,13 @@ const DiscountPopup: React.FC = () => {
     if (!email) return;
     setStatus('sending');
     try {
+      const params = new URLSearchParams();
+      params.append('email', email);
+      params.append('source', 'discount_popup');
+      params.append('discount_code', 'FIRST20');
       await fetch(WEBHOOK_URL, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          source: 'discount_popup',
-          discount_code: 'FIRST20',
-        }),
+        body: params,
         mode: 'no-cors',
       });
       setStatus('sent');

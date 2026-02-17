@@ -329,18 +329,16 @@ const App: React.FC = () => {
               e.preventDefault();
               setFormStatus('sending');
               const form = e.currentTarget;
-              const data = {
-                name: (form.elements.namedItem('name') as HTMLInputElement).value,
-                email: (form.elements.namedItem('email') as HTMLInputElement).value,
-                service: (form.elements.namedItem('service') as HTMLSelectElement).value,
-                message: (form.elements.namedItem('message') as HTMLTextAreaElement).value,
-                source: 'website_quote_form',
-              };
+              const params = new URLSearchParams();
+              params.append('name', (form.elements.namedItem('name') as HTMLInputElement).value);
+              params.append('email', (form.elements.namedItem('email') as HTMLInputElement).value);
+              params.append('service', (form.elements.namedItem('service') as HTMLSelectElement).value);
+              params.append('message', (form.elements.namedItem('message') as HTMLTextAreaElement).value);
+              params.append('source', 'website_quote_form');
               try {
                 await fetch(WEBHOOK_URL, {
                   method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify(data),
+                  body: params,
                   mode: 'no-cors',
                 });
                 setFormStatus('sent');
