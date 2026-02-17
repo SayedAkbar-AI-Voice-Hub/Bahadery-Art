@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 
-const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/Er1cETQk7bVrn97N4m8N/webhook-trigger/08034bf4-710a-4fef-a3a4-ad37e6e39102';
+const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/Er1cETQk7bVrn97N4m8N/webhook-trigger/3c7f6ca8-a11b-4bf2-a7d0-7631dcd38ca7';
 
 const DiscountPopup: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
