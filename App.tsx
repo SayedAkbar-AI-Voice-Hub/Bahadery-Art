@@ -297,7 +297,7 @@ const App: React.FC = () => {
                   </div>
                   <div>
                     <h4 className="text-[10px] uppercase tracking-widest font-bold text-stone-400 mb-1">Email Us</h4>
-                    <p className="text-xl font-medium text-stone-900">contact@bahadery.art</p>
+                    <p className="text-xl font-medium text-stone-900">Nangialaibahadery@gmail.com</p>
                   </div>
                 </div>
                 <div className="flex items-center space-x-6">
