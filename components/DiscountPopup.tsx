@@ -1,8 +1,12 @@
 
 import React, { useState, useEffect } from 'react';
 
+const WEBHOOK_URL = 'https://services.leadconnectorhq.com/hooks/Er1cETQk7bVrn97N4m8N/webhook-trigger/08034bf4-710a-4fef-a3a4-ad37e6e39102';
+
 const DiscountPopup: React.FC = () => {
   const [isVisible, setIsVisible] = useState(false);
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
 
   useEffect(() => {
     const hasSeenPopup = localStorage.getItem('bahadery_discount_seen');
@@ -17,9 +21,27 @@ const DiscountPopup: React.FC = () => {
     localStorage.setItem('bahadery_discount_seen', 'true');
   };
 
-  const handleCTA = () => {
-    handleClose();
-    document.getElementById('contact')?.scrollIntoView({ behavior: 'smooth' });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email) return;
+    setStatus('sending');
+    try {
+      await fetch(WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          email,
+          source: 'discount_popup',
+          discount_code: 'FIRST20',
+        }),
+        mode: 'no-cors',
+      });
+      setStatus('sent');
+      localStorage.setItem('bahadery_discount_seen', 'true');
+      setTimeout(() => setIsVisible(false), 3000);
+    } catch {
+      setStatus('idle');
+    }
   };
 
   if (!isVisible) return null;
@@ -47,28 +69,49 @@ const DiscountPopup: React.FC = () => {
         </div>
 
         <div className="p-8 text-center">
-          <p className="text-stone-600 text-base leading-relaxed mb-6 font-light">
-            As a new patron of Bahadery Art Gallery, enjoy an exclusive <strong className="text-stone-900">20% discount</strong> on your first custom artwork commission — whether it's a canvas painting delivered to your door or a hand-painted mural at your location.
-          </p>
+          {status === 'sent' ? (
+            <div className="py-6">
+              <svg className="w-16 h-16 text-green-600 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <h4 className="text-xl font-bold text-stone-900 serif mb-2">You're In!</h4>
+              <p className="text-stone-600 font-light mb-2">
+                Your discount code <strong className="text-stone-900">FIRST20</strong> has been sent to your email.
+              </p>
+              <p className="text-[10px] text-stone-400 uppercase tracking-widest">Use it when you contact us for your first commission</p>
+            </div>
+          ) : (
+            <>
+              <p className="text-stone-600 text-base leading-relaxed mb-6 font-light">
+                Subscribe to get an exclusive <strong className="text-stone-900">20% discount</strong> on your first custom artwork commission — canvas painting or hand-painted mural.
+              </p>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <button
-              onClick={handleCTA}
-              className="flex-1 bg-stone-900 text-white py-4 font-bold uppercase tracking-[0.15em] text-[11px] hover:bg-stone-800 transition-all shadow-lg"
-            >
-              Claim Your Discount
-            </button>
-            <button
-              onClick={handleClose}
-              className="flex-1 bg-transparent border border-stone-200 text-stone-500 py-4 font-bold uppercase tracking-[0.15em] text-[11px] hover:bg-stone-50 transition-all"
-            >
-              Maybe Later
-            </button>
-          </div>
+              <form onSubmit={handleSubmit} className="space-y-3">
+                <input
+                  type="email"
+                  placeholder="Enter your email address"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                  className="w-full border border-stone-200 p-4 text-sm focus:ring-1 focus:ring-stone-900 focus:border-stone-900 transition-all text-stone-900 placeholder-stone-400 outline-none"
+                />
+                <button
+                  type="submit"
+                  disabled={status === 'sending'}
+                  className="w-full bg-stone-900 text-white py-4 font-bold uppercase tracking-[0.15em] text-[11px] hover:bg-stone-800 transition-all shadow-lg disabled:opacity-50"
+                >
+                  {status === 'sending' ? 'Subscribing...' : 'Get 20% Off'}
+                </button>
+              </form>
 
-          <p className="text-[10px] text-stone-400 mt-4 uppercase tracking-widest">
-            Mention "FIRST20" when you contact us
-          </p>
+              <button
+                onClick={handleClose}
+                className="mt-3 text-stone-400 text-[11px] uppercase tracking-widest hover:text-stone-600 transition-colors"
+              >
+                No thanks
+              </button>
+            </>
+          )}
         </div>
       </div>
     </div>
