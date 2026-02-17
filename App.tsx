@@ -323,46 +323,114 @@ const App: React.FC = () => {
           </div>
           <div className="bg-stone-900 p-12 lg:p-16 text-white shadow-2xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-stone-800 rounded-full -mr-16 -mt-16 opacity-20" />
-            <h3 className="text-2xl font-bold mb-3 serif uppercase tracking-tight">Request a Quote</h3>
-            <p className="text-stone-400 text-sm mb-8 font-light">Tell us about your project and we'll get back to you with a personalized quote.</p>
-            <form className="space-y-6" onSubmit={async (e) => {
-              e.preventDefault();
-              setFormStatus('sending');
-              const form = e.currentTarget;
-              const params = new URLSearchParams();
-              params.append('name', (form.elements.namedItem('name') as HTMLInputElement).value);
-              params.append('email', (form.elements.namedItem('email') as HTMLInputElement).value);
-              params.append('service', (form.elements.namedItem('service') as HTMLSelectElement).value);
-              params.append('message', (form.elements.namedItem('message') as HTMLTextAreaElement).value);
-              params.append('source', 'website_quote_form');
-              try {
-                await fetch(WEBHOOK_URL, {
-                  method: 'POST',
-                  body: params,
-                  mode: 'no-cors',
-                });
-                setFormStatus('sent');
-                form.reset();
-              } catch {
-                setFormStatus('idle');
-              }
-            }}>
-              <input name="name" type="text" placeholder="Full Name" required className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-white placeholder-stone-500" />
-              <input name="email" type="email" placeholder="Email Address" required className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-white placeholder-stone-500" />
-              <select name="service" className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-stone-400 appearance-none">
-                <option>Canvas Painting & Delivery</option>
-                <option>On-Site Wall Painting (UAE)</option>
-                <option>Custom Art Consultation</option>
-                <option>General Inquiry</option>
-              </select>
-              <textarea name="message" rows={4} placeholder="Describe your vision — size, style, surface, location..." className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-white placeholder-stone-500"></textarea>
-              <button
-                disabled={formStatus === 'sending'}
-                className="w-full bg-white text-stone-900 py-6 font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-stone-100 transition-all shadow-xl disabled:opacity-50"
-              >
-                {formStatus === 'sending' ? 'Sending...' : formStatus === 'sent' ? 'Request Sent!' : 'Send Request'}
-              </button>
-            </form>
+            {formStatus === 'sent' ? (
+              <div className="text-center py-10">
+                <svg className="w-20 h-20 text-green-400 mx-auto mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <h3 className="text-3xl font-bold mb-4 serif">Request Submitted!</h3>
+                <p className="text-stone-300 text-lg font-light mb-2">Thank you for reaching out.</p>
+                <p className="text-stone-400 text-sm font-light">We will review your request and get back to you soon.</p>
+                <button
+                  onClick={() => setFormStatus('idle')}
+                  className="mt-8 bg-white text-stone-900 px-10 py-4 font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-stone-100 transition-all shadow-lg"
+                >
+                  Send Another Request
+                </button>
+              </div>
+            ) : (
+              <>
+                <h3 className="text-2xl font-bold mb-3 serif uppercase tracking-tight">Request a Quote</h3>
+                <p className="text-stone-400 text-sm mb-8 font-light">Tell us about your project and we'll get back to you with a personalized quote.</p>
+                <form className="space-y-6" onSubmit={async (e) => {
+                  e.preventDefault();
+                  setFormStatus('sending');
+                  const form = e.currentTarget;
+                  const params = new URLSearchParams();
+                  params.append('name', (form.elements.namedItem('name') as HTMLInputElement).value);
+                  params.append('email', (form.elements.namedItem('email') as HTMLInputElement).value);
+                  const countryCode = (form.elements.namedItem('country_code') as HTMLSelectElement).value;
+                  const phone = (form.elements.namedItem('phone') as HTMLInputElement).value;
+                  params.append('phone', countryCode + phone);
+                  params.append('service', (form.elements.namedItem('service') as HTMLSelectElement).value);
+                  params.append('message', (form.elements.namedItem('message') as HTMLTextAreaElement).value);
+                  params.append('source', 'website_quote_form');
+                  try {
+                    await fetch(WEBHOOK_URL, {
+                      method: 'POST',
+                      body: params,
+                      mode: 'no-cors',
+                    });
+                    setFormStatus('sent');
+                    form.reset();
+                  } catch {
+                    setFormStatus('idle');
+                  }
+                }}>
+                  <input name="name" type="text" placeholder="Full Name" required className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-white placeholder-stone-500" />
+                  <input name="email" type="email" placeholder="Email Address" required className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-white placeholder-stone-500" />
+                  <div className="flex gap-3">
+                    <select name="country_code" className="w-[140px] bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-stone-300 appearance-none flex-shrink-0">
+                      <option value="+971">+971 UAE</option>
+                      <option value="+93">+93 AFG</option>
+                      <option value="+1">+1 US/CA</option>
+                      <option value="+44">+44 UK</option>
+                      <option value="+91">+91 IN</option>
+                      <option value="+92">+92 PK</option>
+                      <option value="+966">+966 SA</option>
+                      <option value="+974">+974 QA</option>
+                      <option value="+973">+973 BH</option>
+                      <option value="+968">+968 OM</option>
+                      <option value="+965">+965 KW</option>
+                      <option value="+90">+90 TR</option>
+                      <option value="+49">+49 DE</option>
+                      <option value="+33">+33 FR</option>
+                      <option value="+39">+39 IT</option>
+                      <option value="+34">+34 ES</option>
+                      <option value="+61">+61 AU</option>
+                      <option value="+86">+86 CN</option>
+                      <option value="+81">+81 JP</option>
+                      <option value="+82">+82 KR</option>
+                      <option value="+55">+55 BR</option>
+                      <option value="+52">+52 MX</option>
+                      <option value="+27">+27 ZA</option>
+                      <option value="+234">+234 NG</option>
+                      <option value="+254">+254 KE</option>
+                      <option value="+20">+20 EG</option>
+                      <option value="+212">+212 MA</option>
+                      <option value="+7">+7 RU</option>
+                      <option value="+62">+62 ID</option>
+                      <option value="+60">+60 MY</option>
+                      <option value="+63">+63 PH</option>
+                      <option value="+66">+66 TH</option>
+                      <option value="+31">+31 NL</option>
+                      <option value="+46">+46 SE</option>
+                      <option value="+41">+41 CH</option>
+                      <option value="+48">+48 PL</option>
+                      <option value="+380">+380 UA</option>
+                      <option value="+98">+98 IR</option>
+                      <option value="+964">+964 IQ</option>
+                      <option value="+962">+962 JO</option>
+                      <option value="+961">+961 LB</option>
+                    </select>
+                    <input name="phone" type="tel" placeholder="WhatsApp / Phone Number" required className="flex-1 bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-white placeholder-stone-500" />
+                  </div>
+                  <select name="service" className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-stone-400 appearance-none">
+                    <option>Canvas Painting & Delivery</option>
+                    <option>On-Site Wall Painting (UAE)</option>
+                    <option>Custom Art Consultation</option>
+                    <option>General Inquiry</option>
+                  </select>
+                  <textarea name="message" rows={4} placeholder="Describe your vision — size, style, surface, location..." className="w-full bg-stone-800 border-none p-5 text-sm focus:ring-1 focus:ring-white transition-all text-white placeholder-stone-500"></textarea>
+                  <button
+                    disabled={formStatus === 'sending'}
+                    className="w-full bg-white text-stone-900 py-6 font-bold uppercase tracking-[0.2em] text-[10px] hover:bg-stone-100 transition-all shadow-xl disabled:opacity-50"
+                  >
+                    {formStatus === 'sending' ? 'Sending...' : 'Send Request'}
+                  </button>
+                </form>
+              </>
+            )}
           </div>
         </div>
       </section>
